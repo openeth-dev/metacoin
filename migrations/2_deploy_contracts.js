@@ -12,17 +12,29 @@ const networks = {
 
 const RelayHub = artifacts.require('./RelayHub.sol')
 
-module.exports = async function (deployer, network) {
-  const hubAddr = networks[network].relayHubAddr
+module.exports = async function deployFunc(deployer, network) {
+  let hubAddr = process.env.HUB
+  if ( !hubAddr && networks[network] ) {
+    hubAddr = networks[network].relayHubAddr
+  }
+  if ( !hubAddr ) {
+    console.log( "must specify HUB=<addr>")
+    process.exit(1)
+  }
   console.log('hub=', hubAddr)
   const hub = await RelayHub.at(hubAddr)
-  await deployer.deploy(ConvertLib)
-  await deployer.link(ConvertLib, MetaCoin)
+  // await deployer.deploy(ConvertLib)
+  // await deployer.link(ConvertLib, MetaCoin)
 
   await deployer.deploy(MetaCoin)
-  await hub.depositFor(MetaCoin.address, { value: 1e17 })
-  console.log('== Initializing Metacoin\'s Hub')
-  const metacoin = await MetaCoin.at(MetaCoin.address)
-  await metacoin.init_hub(hub.address)
-  console.log('Finished 2/3 migrations files')
+  try {
+    await hub.depositFor(MetaCoin.address, { value: 1e17 })
+    console.log('== Initializing Metacoin\'s Hub')
+    const metacoin = await MetaCoin.at(MetaCoin.address)
+    await metacoin.init_hub(hub.address)
+    console.log('Finished 2/3 migrations files')
+  }catch (e) {
+      console.log( "Cought error configuring MetaCoin", e.message)
+      //ignore error: it repeats and succeeds.
+  }
 }

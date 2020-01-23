@@ -6,7 +6,8 @@
     "test": "truffle test",
     "migrate": "truffle migrate",
     "lint": "eslint ./",
-    "prepare": "truffle compile && npm test && npm run lint && webpack-cli --config ./webpack.config.js",
+    "old-prepare": "truffle compile && npm test && npm run lint && webpack-cli --config ./webpack.config.js",
+    "pack": "webpack-cli --config ./webpack.config.js",
     "build": "npm install",
     "dev": "webpack-dev-server"
   },
@@ -49,6 +50,7 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
-    "@openeth/gsn": "0.4.5"
+    "@openeth/gsn": "^0.4.5",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }
