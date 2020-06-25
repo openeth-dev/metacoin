@@ -1,4 +1,4 @@
-/* global ethereum */
+/* global ethereum grecaptcha */
 // Import the page's CSS. Webpack will know what to do with it.
 import '../styles/app.css'
 
@@ -8,13 +8,18 @@ import contract from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
 import metaCoinArtifact from '../../build/contracts/MetaCoin.json'
-import IPaymaster from '../../build/contracts/IPaymaster.json'
+import IPaymaster from '../../build/contracts/IPaymaster'
 import { networks } from './networks'
 
+import {createCaptchaAsyncApprovalCallback } from '@opengsn/captcha-paymaster'
+import {gsnValidate} from './validate'
 const Gsn = require('@opengsn/gsn/dist/src/relayclient/')
 const configureGSN = require('@opengsn/gsn/dist/src/relayclient/GSNConfigurator').configureGSN
 
+
 const RelayProvider = Gsn.RelayProvider
+
+let lastValidApproval
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
 const MetaCoin = contract(metaCoinArtifact)
@@ -25,23 +30,35 @@ const MetaCoin = contract(metaCoinArtifact)
 let accounts
 let account
 let forwarder
-
+let paymaster
+let gsnConfig
 var network
 
 const App = {
   start: async function () {
+
     const self = this
     // This should actually be web3.eth.getChainId but MM compares networkId to chainId apparently
     web3.eth.net.getId(function (err, networkId) {
-      if (parseInt(networkId) < 1e4 ) { // We're on testnet/
+      if (parseInt(networkId) < 1e4) { // We're on testnet/
+        console.log( 'using network ', networkId)
         network = networks[networkId]
-        MetaCoin.deployed = () => MetaCoin.at(network.metacoin)
+        MetaCoin.networks[networkId] = { address: network.metacoin }
+        // MetaCoin.deployed = () => MetaCoin.at(network.metacoin).catch( err=> {
+        //   console.log( 'no metacoin: ', err)
+        // })
       } else { // We're on ganache
+
+        //instead of loading contract and using "...deployed()"
+        const captchaPaymaster = require( '../../build/contracts/CaptchaPaymaster').networks[networkId].address
+
+        //needed only  to have an address
+        CaptchaPaymaster.setProvider(web3.currentProvider)
         console.log('Using local ganache')
         network = {
           relayHub: require('../../build/gsn/RelayHub.json').address,
           stakeManager: require('../../build/gsn/StakeManager.json').address,
-          paymaster: require('../../build/gsn/Paymaster.json').address
+          paymaster: captchaPaymaster
         }
       }
       if (!network) {
@@ -55,17 +72,58 @@ const App = {
         console.log('Error getting chainId', err)
         process.exit(-1)
       }
-      const gsnConfig = configureGSN({
+      gsnConfig = configureGSN({
+        // verbose:true,
         relayHubAddress: network.relayHub,
         stakeManagerAddress: network.stakeManager,
         methodSuffix: '_v4',
         jsonStringifyRequest: true,
         chainId: networkId,
         paymasterAddress: network.paymaster,
-        gasPriceFactorPercent: 70,
         relayLookupWindowBlocks: 1e5
       })
-      var provider = new RelayProvider(web3.currentProvider, gsnConfig)
+
+      // This is the only require asyncApprovalData.
+      // the code below is for disabling local tests, so we can see real on-chain validation
+      let asyncApprovalData = createCaptchaAsyncApprovalCallback(web3, () => grecaptcha.getResponse())
+
+      // FOR TESTING: wrap it, so we can test "old" captcha checking:
+      const allowOldCaptcha_asyncApprovalData = createCaptchaAsyncApprovalCallback(web3, async () => {
+        let ret
+        try {
+          ret = await grecaptcha.getResponse()
+        } catch (e) {
+          console.log('grecaptcha ex=', e.toString(), 'using lastValid:', lastValidApproval)
+          return lastValidApproval || '0x'
+        }
+        // for testing: if no captcha data, use old (stale) result
+        if (ret) {
+          lastValidApproval = ret
+        } else {
+          console.log( 'no valid approval. re-using old approval (which should fail...)')
+          ret = lastValidApproval || '0x'
+        }
+
+        // if you further want to verify the signature check, modify one of the last 65 bytes.
+        return ret || '0x'
+      })
+
+      // Replace the asyncApprovalData with a "relaxed" wrapper that always send something to the paymaster
+      asyncApprovalData = async (req) => {
+        try {
+          return await allowOldCaptcha_asyncApprovalData(req)
+        } catch (e) {
+          console.log('asyncApprovalData ex=', e)
+          // instead of aborting, send "something" as approval data
+          return '0x'
+        }
+      }
+
+
+      var provider = new RelayProvider(web3.currentProvider, gsnConfig, {
+        asyncApprovalData
+      })
+
       web3.setProvider(provider)
 
       // Bootstrap the MetaCoin abstraction for Use.
@@ -122,19 +180,29 @@ const App = {
     putAddr( 'paymaster', network.paymaster )
     putAddr( 'hubaddr', network.relayHub )
 
-    new web3.eth.Contract( IPaymaster.abi, network.paymaster ).methods
-      .getRelayHubDeposit().call().then(bal=> {
+    const pm = new web3.eth.Contract( IPaymaster.abi, network.paymaster ).methods
+    pm.getRelayHubDeposit().call().then(bal=> {
       putItem( 'paymasterBal', "- eth balance: "+(bal/1e18) )
-    }).catch(console.log)
+    }).catch(()=>putItem( 'paymasterBal', "invalid paymaster"))
 
 
     let meta
     MetaCoin.deployed().then(function (instance) {
       meta = instance
-      console.log('Metacoin deployed', instance)
+      // console.log('Metacoin deployed', instance)
       const address = document.getElementById('address')
       address.innerHTML = self.addressLink(account)
       putAddr( 'metaaddr', MetaCoin.address)
+
+      gsnValidate({
+        web3,
+        ...gsnConfig,
+        to: MetaCoin.address,
+        from: account
+      }).catch(err=>{
+        console.log( 'fatal: error', err)
+      }).then( ()=>console.log( 'gsn config Validated OK'))
+
 
       return meta.balanceOf.call(account, { from: account })
     }).then(function (value) {
@@ -183,7 +251,7 @@ const App = {
     let meta
     MetaCoin.deployed().then(function (instance) {
       meta = instance
-      console.log('Metacoin deployed', instance)
+      //console.log('Metacoin deployed', instance)
       return meta.transfer(receiver, amount,
         { from: account })
     }).then(function (res) {

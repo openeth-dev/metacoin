@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MetaCoin - Using Gas Stations Network</title>
+  <title>MetaCoin - Using Gas Stations Network with</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <script src="./app.js"></script>
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </head>
 <body>
   <a class="github-fork-ribbon" href="https://github.com/opengsn/metacoin" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
@@ -19,6 +21,9 @@
   <br>Your address:<br><b><span id="address">here</span></b><p>
   <br><label for="amount">Amount:</label><br><input type="text" id="amount" placeholder="e.g., 95" width="50%"></input>
   <p><label for="receiver">To Address:</label><br><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae" width="90%"></input>
+  <div class="g-recaptcha" data-sitekey="6Ld4_wAVAAAAAIEBScYmdAfxvY2-r9gOfnJXyPkO"></div>
+  Note: you must click the "I'm not a robot" button before you can successfuly make a call. However, you can experiment with
+   waiting for the captcha to expire, or re-clicking it to see how the CaptchaPaymaster validates the response to be valid
   <br><br><button id="send" onclick="App.transfer()">Send MetaCoin</button>
   <p>Just for test purposes, you can mint coins for your address...
   <br><button id="send" onclick="App.mint()">Mint some coins...</button>
@@ -28,7 +33,7 @@
   <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
   <p>MetaCoin:<br><b><span id="metaaddr">here</span></b>
   <p>RelayHub:<br><b><span id="hubaddr">here</span></b>
-  <p>Paymaster:<br><b><span id="paymaster">here</span></b> <span id="paymasterBal"></span>
+  <p>CaptchaPaymaster:<br><b><span id="paymaster">here</span></b> <span id="paymasterBal"></span>
   <p>TrustedForwarder:<br><b><span id="forwarderAddress">here</span></b>
 
 </body>
