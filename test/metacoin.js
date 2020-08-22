@@ -3,7 +3,7 @@ var MetaCoin = artifacts.require('./MetaCoin.sol')
 contract('MetaCoin', function (accounts) {
   it('should put 10000 MetaCoin in the first account', function () {
     return MetaCoin.deployed().then(function (instance) {
-      return instance.getBalance.call(accounts[0])
+      return instance.balanceOf.call(accounts[0])
     }).then(function (balance) {
       assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account")
     })
@@ -15,7 +15,7 @@ contract('MetaCoin', function (accounts) {
 
     return MetaCoin.deployed().then(function (instance) {
       meta = instance
-      return meta.getBalance.call(accounts[0])
+      return meta.balanceOf.call(accounts[0])
     }).then(function (outCoinBalance) {
       metaCoinBalance = outCoinBalance.toNumber()
       return meta.getBalanceInEth.call(accounts[0])
@@ -46,18 +46,18 @@ contract('MetaCoin', function (accounts) {
 
     return MetaCoin.deployed().then(function (instance) {
       meta = instance
-      return meta.getBalance.call(accountOne)
+      return meta.balanceOf.call(accountOne)
     }).then(function (balance) {
       accountOneStartingBalance = balance.toNumber()
-      return meta.getBalance.call(accountTwo)
+      return meta.balanceOf.call(accountTwo)
     }).then(function (balance) {
       accountTwoStartingBalance = balance.toNumber()
       return meta.transfer(accountTwo, amount, { from: accountOne })
     }).then(function () {
-      return meta.getBalance.call(accountOne)
+      return meta.balanceOf.call(accountOne)
     }).then(function (balance) {
       accountOneEndingBalance = balance.toNumber()
-      return meta.getBalance.call(accountTwo)
+      return meta.balanceOf.call(accountTwo)
     }).then(function (balance) {
       accountTwoEndingBalance = balance.toNumber()
 

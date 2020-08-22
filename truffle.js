@@ -16,11 +16,17 @@ module.exports = {
       port: 8545,
       network_id: '*' // Match any network id
     },
-    rinkeby: {
+    kovan: {
       provider: function () {
-        return new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/c3422181d0594697a38defe7706a1e5b')
+        return new HDWalletProvider(mnemonic, 'https://kovan.infura.io/v3/c3422181d0594697a38defe7706a1e5b')
       },
-      network_id: 4
+      network_id: 42
+    },
+    ropsten: {
+      provider: function () {
+        return new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/c3422181d0594697a38defe7706a1e5b')
+      },
+      network_id: 3
     },
     kotti: {
       provider: function () {
@@ -39,7 +45,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.5.16'
+      version: '0.6.9'
     }
   }
 }

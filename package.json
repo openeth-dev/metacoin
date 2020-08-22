@@ -12,7 +12,7 @@
     "update-deployed": "./scripts/update-deployed.js --deployed deployed.json",
     "dev": "webpack-dev-server",
     "ganache": "ganache-cli -k 'istanbul' -l 1e8",
-    "dev-with-gsn": "npx gsn deploy-relay-hub && npx gsn fund-paymaster && (npx gsn run-relayer --Workdir /tmp/server --DevMode --RelayHubAddress `grep -o -E \"0x[a-fA-F0-9]+\" build/gsn/RelayHub.json` & ) | grep -m 1 \"intialized\" && npx gsn register-relayer && npx truffle migrate && npm run dev"
+    "ganache-with-gsn": "run-with-ganache 'gsn start'"
   },
   "license": "MIT",
   "devDependencies": {
@@ -44,7 +44,6 @@
     "solc": "0.5.16",
     "source-map-support": "^0.5.3",
     "style-loader": "^0.21.0",
-    "truffle": "5.1.22",
     "truffle-contract": "^4.0.31",
     "web3": "1.2.6",
     "web3-utils": "1.2.6",
@@ -53,7 +52,9 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
-    "@opengsn/gsn": "0.8.3",
+    "@opengsn/gsn": "2.0.0-beta.1.3",
+    "run-with-ganache": "^0.1.1",
+    "truffle": "^5.1.41",
     "truffle-hdwallet-provider": "^1.0.17"
   }
 }

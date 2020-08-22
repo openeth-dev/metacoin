@@ -10,9 +10,9 @@ import contract from 'truffle-contract'
 import metaCoinArtifact from '../../build/contracts/MetaCoin.json'
 import IPaymaster from '../../build/contracts/IPaymaster.json'
 import { networks } from './networks'
+import { resolveConfigurationGSN } from '@opengsn/gsn'
 
-const Gsn = require('@opengsn/gsn/dist/src/relayclient/')
-const configureGSN = require('@opengsn/gsn/dist/src/relayclient/GSNConfigurator').configureGSN
+const Gsn = require('@opengsn/gsn')
 
 const RelayProvider = Gsn.RelayProvider
 
@@ -32,7 +32,7 @@ const App = {
   start: async function () {
     const self = this
     // This should actually be web3.eth.getChainId but MM compares networkId to chainId apparently
-    web3.eth.net.getId(function (err, networkId) {
+    web3.eth.net.getId(async function (err, networkId) {
       if (parseInt(networkId) < 1e4 ) { // We're on testnet/
         network = networks[networkId]
         MetaCoin.deployed = () => MetaCoin.at(network.metacoin)
@@ -40,8 +40,8 @@ const App = {
         console.log('Using local ganache')
         network = {
           relayHub: require('../../build/gsn/RelayHub.json').address,
-          stakeManager: require('../../build/gsn/StakeManager.json').address,
-          paymaster: require('../../build/gsn/Paymaster.json').address
+          paymaster: require('../../build/gsn/Paymaster.json').address,
+          forwarder: require('../../build/gsn/Paymaster.json').address
         }
       }
       if (!network) {
@@ -49,18 +49,18 @@ const App = {
         fatalmessage.innerHTML = "Wrong network. please switch to 'kovan' or 'ropsten'"
         return
       }
-      console.log( 'chainid=', networkId, network)
+      console.log('chainid=', networkId, network)
 
       if (err) {
         console.log('Error getting chainId', err)
         process.exit(-1)
       }
-      const gsnConfig = configureGSN({
-        relayHubAddress: network.relayHub,
-        stakeManagerAddress: network.stakeManager,
+      const gsnConfig = await resolveConfigurationGSN(window.ethereum, {
+        verbose: true,
         methodSuffix: '_v4',
         jsonStringifyRequest: true,
         chainId: networkId,
+        forwarderAddress: network.forwarder,
         paymasterAddress: network.paymaster,
         gasPriceFactorPercent: 70,
         relayLookupWindowBlocks: 1e5
@@ -141,9 +141,12 @@ const App = {
       const balanceElement = document.getElementById('balance')
       balanceElement.innerHTML = value.valueOf()
 
-      return meta.getTrustedForwarder.call({ from: account })
-    }).then(function (forwarderAddress) {
+    //   // TODO: read forwarder from contract.
+    //   return forwarder
+    //   // return meta.getTrustedForwarder.call({ from: account })
+    // }).then(function (forwarderAddress) {
 
+      const forwarderAddress = network.forwarder
       const forwarderElement = document.getElementById('forwarderAddress')
       forwarderElement.innerHTML = self.addressLink(forwarderAddress, forwarderAddress)
 

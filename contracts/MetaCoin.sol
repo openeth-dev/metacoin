@@ -1,4 +1,5 @@
-pragma solidity ^0.5.16;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.2;
 
 import "./ConvertLib.sol";
 import "@opengsn/gsn/contracts/BaseRelayRecipient.sol";
@@ -21,6 +22,10 @@ contract MetaCoin is BaseRelayRecipient {
     constructor(address forwarder) public {
         balances[tx.origin] = 10000;
         trustedForwarder = forwarder;
+    }
+
+    function versionRecipient() external override view returns (string memory) {
+        return "2.0.0";
     }
 
     function transfer(address receiver, uint amount) public returns (bool sufficient) {
