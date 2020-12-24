@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MetaCoin - Using Gas Stations Network</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <script src="./app.js"></script>
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+</head>
+<body>
+  <a class="github-fork-ribbon" href="https://github.com/opengsn/metacoin" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+  <h1>MetaCoin</h1>
+  <h2>Using Gas&nbsp;Stations&nbsp;Network</h2>
+  <br/><span style="color:red" id="fatalmessage"></span>
+  <h3>You have <span class="black"><span id="balance"></span> META</span></h3>
+
+  <br>
+  <h1>Send MetaCoin</h1>
+  <br>Your address:<br><b><span id="address">here</span></b><p>
+  <br><label for="amount">Amount:</label><br><input type="text" id="amount" placeholder="e.g., 95" width="50%"></input>
+  <p><label for="receiver">To Address:</label><br><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae" width="90%"></input>
+    <button onclick="receiver.value='0x'.padEnd(42,'0')" >0x0</button>
+  <br><br><button id="send" onclick="App.transfer()">Send MetaCoin</button>
+  <p>Just for test purposes, you can mint coins for your address...
+  <br><button id="send" onclick="App.mint()">Mint some coins...</button>
+  <br><br>
+  <span id="status"></span>
+  <br>
+  <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
+  <p>MetaCoin:<br><b><span id="metaaddr">here</span></b>
+  <p>RelayHub:<br><b><span id="hubaddr">here</span></b>
+  <p>Paymaster:<br><b><span id="paymaster">here</span></b> <span id="paymasterBal"></span>
+  <p>TrustedForwarder:<br><b><span id="forwarderAddress">here</span></b>
+
+</body>
+</html>
