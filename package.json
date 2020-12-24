@@ -5,7 +5,7 @@
   "scripts": {
     "test": "truffle test",
     "migrate": "truffle migrate",
-    "migrate-binance" :"truffle migrate --network binance",
+    "migrate-binance": "truffle migrate --network binance",
     "lint": "eslint ./",
     "lint:fix": "eslint . --fix",
     "old-prepare": "truffle compile && npm test && npm run lint && webpack-cli --config ./webpack.config.js",
