@@ -8,7 +8,7 @@ module.exports = {
       metacoin: '0x75f23C8241a9CEac032429fB94455102922C02C6',
       relayHub: '0xE9dcD2CccEcD77a92BA48933cb626e04214Edb92',
       paymaster: '0x083082b7Eada37dbD8f263050570B31448E61c94',
-      forwarder: '0x58f24A413F6fb98f217600703C7086EA22B49C47'
+      forwarder: '0x0842Ad6B8cb64364761C7c170D0002CC56b1c498'
     },
     3: {
       addressUrl: 'https://dashboard.tenderly.co/contract/ropsten/',
