@@ -17,6 +17,13 @@ module.exports = {
       port: 8545,
       network_id: '*' // Match any network id
     },
+    binance: {
+      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+      network_id: 97,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     kovan: {
       provider: function () {
         return new HDWalletProvider(mnemonic, 'https://kovan.infura.io/v3/c3422181d0594697a38defe7706a1e5b')
